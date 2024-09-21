@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String?
+  country  String?
+  address  String?
+  city     String?
+  products Product[]
+  projects Project[]
+  invoices Invoice[] // Ein User kann mehrere Rechnungen erstellen
+
+  // Timestamps
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
+
+  Contacts Contacts[]
+}
+
+model Contacts {
+  id      Int       @id @default(autoincrement())
+  email   String    @unique
+  name    String?
+  country String?
+  address String?
+  city    String?
+  user    User?     @relation(fields: [userId], references: [id])
+  userId  Int?
+  Invoice Invoice[]
+}
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  title       String
+  description String?
+  price       Decimal?
+  unit        String?
+  surcharge   Decimal?
+  sellPrice   Decimal?
+  creator     User?             @relation(fields: [creatorId], references: [id])
+  creatorId   Int?
+  positions   InvoicePosition[] // Ein Produkt kann in mehreren Rechnungspositionen verwendet werden
+
+  // Timestamps
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  owner       User?     @relation(fields: [ownerId], references: [id])
+  ownerId     Int?
+  invoices    Invoice[] // Ein Projekt kann mehrere Rechnungen haben
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id            Int               @id @default(autoincrement())
+  invoiceNumber String            @unique
+  description   String?
+  project       Project?          @relation(fields: [projectId], references: [id])
+  projectId     Int?
+  owner         User              @relation(fields: [ownerId], references: [id]) // Wer die Rechnung erstellt
+  ownerId       Int
+  positions     InvoicePosition[] // Eine Rechnung hat mehrere Positionen
+  contact       Contacts?         @relation(fields: [contactId], references: [id]) // Der Empfänger
+  contactId     Int?
+
+  issueDate   DateTime // Rechnungsdatum
+  dueDate     DateTime? // Fälligkeitsdatum
+  totalAmount Decimal // Gesamtsumme der Rechnung
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InvoicePosition {
+  id         Int      @id @default(autoincrement())
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
+  invoiceId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  quantity   Int // Anzahl der Produkte
+  unitPrice  Decimal // Einzelpreis des Produkts (zum Zeitpunkt der Rechnung)
+  discount   Decimal? // Rabatt (optional)
+  totalPrice Decimal // Gesamtpreis für diese Position (berechnet: quantity * unitPrice - discount)
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
