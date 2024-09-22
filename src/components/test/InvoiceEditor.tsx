@@ -1,19 +1,35 @@
 "use client";
 
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Invoice } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 
-export default function InvoiceEditor() {
+export default function InvoiceEditor({
+    invoiceData,
+}: {
+    invoiceData: Invoice | null;
+}) {
     const [searchTerm, setSearchTerm] = useState("");
     const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
 
     const [recipient, setRecipient] = useState("");
-    const [invoiceNumber, setInvoiceNumber] = useState("");
+    const [invoiceNumber, setInvoiceNumber] = useState(
+        invoiceData?.invoiceNumber
+    );
     const [subject, setSubject] = useState("");
     const [description, setDescription] = useState("");
     const [invoiceDate, setInvoiceDate] = useState("");
+
+    // Use useEffect to update the form fields when invoiceData is available
+    useEffect(() => {
+        if (invoiceData) {
+            setInvoiceNumber(invoiceData.invoiceNumber);
+            setSubject(invoiceData.description || "");
+            setDescription(invoiceData.description || "");
+        }
+    }, [invoiceData]); // Run when invoiceData changes
 
     // Fetch products from the API
     useEffect(() => {
@@ -28,6 +44,8 @@ export default function InvoiceEditor() {
         };
 
         fetchProducts();
+
+        console.log(invoiceData);
     }, []);
 
     // Filter products based on the search term
@@ -214,7 +232,7 @@ export default function InvoiceEditor() {
                                 Rechnungsdetails:
                             </h3>
                             <p className="text-gray-500">
-                                Rechnungsnummer: {invoiceNumber || "..."}
+                                Rechnungsnummer: {invoiceNumber}
                             </p>
                             <p className="text-gray-500">
                                 Betreff: {subject || "..."}

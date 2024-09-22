@@ -9,7 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#4B70F5",
+        primary: "#e96d27",
+        sidebarBg: "#20212b",
       }
     },
   },

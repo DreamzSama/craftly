@@ -33,3 +33,33 @@ export async function GET() {
     const products = await prisma.product.findMany();
     return NextResponse.json(products);
 }
+
+
+export async function PUT(request: NextRequest) {
+    try {
+        // Body aus dem Request auslesen
+        const body: Product = await request.json();
+
+        // Datensatz in der Datenbank speichern
+        const product = await prisma.product.update({
+            where: {
+                id: body.id
+            },
+            data: {
+                title: body.title,
+                description: body.description,
+                price: body.price,
+                surcharge: body.surcharge,
+                sellPrice: body.sellPrice,
+                unit: body.unit
+            },
+        });
+
+        // Erfolgreiche Antwort zurückgeben
+        return NextResponse.json(product);
+    } catch (error) {
+        // Fehlerbehandlung
+        console.error("Error creating product:", error);
+        return new NextResponse("Failed to create product", { status: 500 });
+    }
+}

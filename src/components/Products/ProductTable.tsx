@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useCallback } from "react";
 import {
     EllipsisVerticalIcon,
     PencilIcon,
@@ -7,36 +8,57 @@ import {
     CheckIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline";
-import React, { useState } from "react";
-
-interface Product {
-    id: number;
-    title: string;
-    description: string;
-    price: number;
-    unit: string;
-    surcharge: number;
-    sellPrice: number;
-}
 
 interface ProductTableProps {
     products: Product[];
     onUpdateProduct: (product: Product) => void;
 }
 
-export default function ProductTable({ products, onUpdateProduct }: ProductTableProps) {
-    const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: number]: boolean }>({});
+const MAX_DESCRIPTION_LENGTH = 50;
+
+const ProductTable: React.FC<ProductTableProps> = ({
+    products,
+    onUpdateProduct,
+}) => {
+    const [expandedDescriptions, setExpandedDescriptions] = useState<
+        Record<number, boolean>
+    >({});
     const [editRow, setEditRow] = useState<number | null>(null);
     const [editedProduct, setEditedProduct] = useState<Product | null>(null);
 
-    const maxDescriptionLength = 50;
-
-    const toggleDescription = (id: number) => {
+    const toggleDescription = useCallback((id: number) => {
         setExpandedDescriptions((prevState) => ({
             ...prevState,
             [id]: !prevState[id],
         }));
-    };
+    }, []);
+
+    const handleEdit = useCallback((product: Product) => {
+        setEditRow(product.id);
+        setEditedProduct(product);
+    }, []);
+
+    const handleSave = useCallback(() => {
+        if (editedProduct) {
+            onUpdateProduct(editedProduct);
+            setEditRow(null);
+            setEditedProduct(null);
+        }
+    }, [editedProduct, onUpdateProduct]);
+
+    const handleCancel = useCallback(() => {
+        setEditRow(null);
+        setEditedProduct(null);
+    }, []);
+
+    const handleInputChange = useCallback(
+        (field: keyof Product, value: string | number) => {
+            if (editedProduct) {
+                setEditedProduct({ ...editedProduct, [field]: value });
+            }
+        },
+        [editedProduct]
+    );
 
     return (
         <table className="table bg-white rounded-xl p-3 w-full">
@@ -55,28 +77,15 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                 {products.map((product) => {
                     const isExpanded = expandedDescriptions[product.id];
                     const isEditing = editRow === product.id;
+
                     const description =
-                        product.description.length > maxDescriptionLength && !isExpanded
-                            ? product.description.slice(0, maxDescriptionLength) + "..."
+                        product.description.length > MAX_DESCRIPTION_LENGTH &&
+                        !isExpanded
+                            ? product.description.slice(
+                                  0,
+                                  MAX_DESCRIPTION_LENGTH
+                              ) + "..."
                             : product.description;
-
-                    const handleEdit = () => {
-                        setEditRow(product.id);
-                        setEditedProduct(product);
-                    };
-
-                    const handleSave = () => {
-                        if (editedProduct) {
-                            onUpdateProduct(editedProduct);
-                        }
-                        setEditRow(null);
-                        setEditedProduct(null);
-                    };
-
-                    const handleCancel = () => {
-                        setEditRow(null);
-                        setEditedProduct(null);
-                    };
 
                     return (
                         <tr key={product.id}>
@@ -86,7 +95,10 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                         type="text"
                                         value={editedProduct?.title || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({ ...editedProduct!, title: e.target.value })
+                                            handleInputChange(
+                                                "title",
+                                                e.target.value
+                                            )
                                         }
                                         className="input input-bordered w-full"
                                     />
@@ -99,19 +111,29 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                     <textarea
                                         value={editedProduct?.description || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({ ...editedProduct!, description: e.target.value })
+                                            handleInputChange(
+                                                "description",
+                                                e.target.value
+                                            )
                                         }
                                         className="textarea textarea-bordered w-full"
                                     />
                                 ) : (
                                     <>
                                         {description}
-                                        {product.description.length > maxDescriptionLength && (
+                                        {product.description.length >
+                                            MAX_DESCRIPTION_LENGTH && (
                                             <button
-                                                onClick={() => toggleDescription(product.id)}
+                                                onClick={() =>
+                                                    toggleDescription(
+                                                        product.id
+                                                    )
+                                                }
                                                 className="ml-2 text-blue-500"
                                             >
-                                                {isExpanded ? "Weniger" : "Mehr"}
+                                                {isExpanded
+                                                    ? "Weniger"
+                                                    : "Mehr"}
                                             </button>
                                         )}
                                     </>
@@ -123,10 +145,10 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                         type="number"
                                         value={editedProduct?.price || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({
-                                                ...editedProduct!,
-                                                price: parseFloat(e.target.value),
-                                            })
+                                            handleInputChange(
+                                                "price",
+                                                parseFloat(e.target.value)
+                                            )
                                         }
                                         className="input input-bordered w-full"
                                     />
@@ -140,7 +162,10 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                         type="text"
                                         value={editedProduct?.unit || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({ ...editedProduct!, unit: e.target.value })
+                                            handleInputChange(
+                                                "unit",
+                                                e.target.value
+                                            )
                                         }
                                         className="input input-bordered w-full"
                                     />
@@ -154,10 +179,10 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                         type="number"
                                         value={editedProduct?.surcharge || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({
-                                                ...editedProduct!,
-                                                surcharge: parseFloat(e.target.value),
-                                            })
+                                            handleInputChange(
+                                                "surcharge",
+                                                parseFloat(e.target.value)
+                                            )
                                         }
                                         className="input input-bordered w-full"
                                     />
@@ -171,10 +196,10 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                         type="number"
                                         value={editedProduct?.sellPrice || ""}
                                         onChange={(e) =>
-                                            setEditedProduct({
-                                                ...editedProduct!,
-                                                sellPrice: parseFloat(e.target.value),
-                                            })
+                                            handleInputChange(
+                                                "sellPrice",
+                                                parseFloat(e.target.value)
+                                            )
                                         }
                                         className="input input-bordered w-full"
                                     />
@@ -183,40 +208,35 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                 )}
                             </td>
                             <td>
-                                <div className="dropdown dropdown-bottom dropdown-end">
-                                    <button tabIndex={0} className="btn btn-ghost">
-                                        <EllipsisVerticalIcon className="h-6 w-6" />
-                                    </button>
-                                    <ul
-                                        tabIndex={0}
-                                        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-                                    >
-                                        {isEditing ? (
+                                {isEditing ? (
+                                    <>
+                                        <div className="flex flex-row space-x-4">
+                                            <button onClick={handleCancel} className="btn">
+                                                Abbrechen
+                                            </button>
+                                            <button onClick={handleSave} className="btn bg-primary text-white hover:bg-orange-700">
+                                                Speichern
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="dropdown dropdown-bottom dropdown-end">
+                                        <button
+                                            tabIndex={0}
+                                            className="btn btn-ghost"
+                                        >
+                                            <EllipsisVerticalIcon className="h-6 w-6" />
+                                        </button>
+                                        <ul
+                                            tabIndex={0}
+                                            className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+                                        >
                                             <>
                                                 <li>
                                                     <button
-                                                        onClick={handleSave}
-                                                        className="flex items-center"
-                                                    >
-                                                        <CheckIcon className="h-5 w-5 mr-2" />
-                                                        Speichern
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        onClick={handleCancel}
-                                                        className="flex items-center"
-                                                    >
-                                                        <XMarkIcon className="h-5 w-5 mr-2" />
-                                                        Abbrechen
-                                                    </button>
-                                                </li>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <li>
-                                                    <button
-                                                        onClick={handleEdit}
+                                                        onClick={() =>
+                                                            handleEdit(product)
+                                                        }
                                                         className="flex items-center"
                                                     >
                                                         <PencilIcon className="h-5 w-5 mr-2" />
@@ -230,9 +250,9 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
                                                     </button>
                                                 </li>
                                             </>
-                                        )}
-                                    </ul>
-                                </div>
+                                        </ul>
+                                    </div>
+                                )}
                             </td>
                         </tr>
                     );
@@ -251,4 +271,6 @@ export default function ProductTable({ products, onUpdateProduct }: ProductTable
             </tfoot>
         </table>
     );
-}
+};
+
+export default ProductTable;

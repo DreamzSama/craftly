@@ -50,6 +50,38 @@ export default function Page() {
         }
     };
 
+    const handleUpdateProduct = async (productData: {
+        id: number;
+        title: string;
+        description: string;
+        price: number;
+        surcharge: number;
+        sellPrice: number;
+        unit: string;
+    }) => {
+        try {
+            const response = await fetch("/api/products", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(productData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Fehler beim Aktualisieren des Produkts");
+            }
+
+            const data = await response.json();
+            console.log("Produkt erfolgreich aktualisiert:", data);
+            setProducts((prevProducts) =>
+                prevProducts.map((p) => (p.id === data.id ? data : p))
+            );
+        } catch (error) {
+            console.error("Fehler:", error);
+        }
+    };
+
     return (
         <div className="bg-gray-100 p-3 min-h-screen max-w-screen">
             <div>
@@ -63,11 +95,15 @@ export default function Page() {
                     </button>
                 </div>
                 <div className="flex flex-col space-y-6">
-                    <ProductForm setOpenForm={setOpenForm}
+                    <ProductForm
+                        setOpenForm={setOpenForm}
                         openForm={openForm}
                         onSubmit={handleProductSubmit}
                     />
-                    <ProductTable products={products} />
+                    <ProductTable
+                        onUpdateProduct={handleUpdateProduct}
+                        products={products}
+                    />
                 </div>
             </div>
         </div>
