@@ -8,6 +8,15 @@
             "name": "test-pg",
             "database": "test-pg",
             "username": "postgres"
+        },
+        {
+            "previewLimit": 50,
+            "server": "188.245.177.135",
+            "port": 5000,
+            "driver": "PostgreSQL",
+            "name": "test-pg",
+            "database": "postgres",
+            "username": "postgres"
         }
     ]
 }

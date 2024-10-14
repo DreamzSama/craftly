@@ -9,8 +9,10 @@ import {
     CogIcon,
     InboxIcon,
     ViewColumnsIcon,
+    ArrowLeftEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 interface SidebarItemProps {
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -18,7 +20,11 @@ interface SidebarItemProps {
     link?: string;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, text, link }) => {
+const SidebarItem: React.FC<SidebarItemProps> = ({
+    icon: Icon,
+    text,
+    link,
+}) => {
     const router = useRouter();
     const pathname = usePathname();
     const isActive = link ? pathname === link : false;
@@ -54,21 +60,48 @@ const Sidebar: React.FC = () => {
                         alt="Logo"
                         className="w-14 h-14"
                     />
-                    <span className="text-2xl ml-3 text-white font-bold">Logo.</span>
+                    <span className="text-2xl ml-3 text-white font-bold">
+                        Logo.
+                    </span>
                 </div>
                 <nav className="mt-10 mx-3 flex flex-col space-y-3">
                     <SidebarItem icon={HomeIcon} link="/home" text="Home" />
-                    <SidebarItem icon={ViewColumnsIcon} link="/einsatzplan" text="Einsatzplan" />
-                    <SidebarItem icon={ChartBarIcon} link="/projekte" text="Projekte" />
-                    <SidebarItem icon={ShoppingBagIcon} link="/lager" text="Lager" />
-                    <SidebarItem icon={UserIcon} link="/kontakte" text="Kontakte" />
+                    <SidebarItem
+                        icon={ViewColumnsIcon}
+                        link="/einsatzplan"
+                        text="Einsatzplan"
+                    />
+                    <SidebarItem
+                        icon={ChartBarIcon}
+                        link="/projekte"
+                        text="Projekte"
+                    />
+                    <SidebarItem
+                        icon={ShoppingBagIcon}
+                        link="/lager"
+                        text="Lager"
+                    />
+                    <SidebarItem
+                        icon={UserIcon}
+                        link="/kontakte"
+                        text="Kontakte"
+                    />
                     <SidebarItem icon={CogIcon} link="/" text="Settings" />
-                    <SidebarItem icon={InboxIcon} link="/" text="Integrations" />
+                    <SidebarItem
+                        icon={InboxIcon}
+                        link="/"
+                        text="Integrations"
+                    />
                 </nav>
             </div>
             <div className="mb-10 mx-3">
-                <SidebarItem icon={ChartBarIcon} text="Activity" />
                 <SidebarItem icon={CogIcon} text="Help & Support" />
+                <div onClick={() => signOut()}>
+                    <SidebarItem
+                        icon={ArrowLeftEndOnRectangleIcon}
+                        text="Logout"
+                    />
+                </div>
             </div>
         </div>
     );

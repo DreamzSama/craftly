@@ -1,11 +1,18 @@
 "use client";
 
+import Modal from "@/components/Project/Modal";
 import InvoiceEditor from "@/components/test/InvoiceEditor";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Project } from "@prisma/client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 export default function Page() {
+    const [openForm, setOpenForm] = useState(false);
+
+    const handleOpenForm = () => {
+        setOpenForm(!openForm);
+    };
 
     const [projects, setProjects] = useState<Project[]>([]);
     const [newProject, setNewProject] = useState({
@@ -55,70 +62,66 @@ export default function Page() {
     };
 
     return (
-        <div className="p-6">
+        <div className="p-6 bg-gray-100 h-full">
             <h1 className="text-3xl font-bold mb-4">Projekte</h1>
 
             {/* Projektformular */}
-            <div className="my-8">
-                <h2 className="text-xl font-semibold mb-4">
-                    Neues Projekt hinzufügen
-                </h2>
-                <form onSubmit={handleProjectSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                            Projektname
-                        </label>
-                        <input
-                            type="text"
-                            value={newProject.title}
-                            onChange={(e) =>
-                                setNewProject({
-                                    ...newProject,
-                                    title: e.target.value,
-                                })
-                            }
-                            className="input input-bordered w-full"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                            Beschreibung
-                        </label>
-                        <textarea
-                            value={newProject.description}
-                            onChange={(e) =>
-                                setNewProject({
-                                    ...newProject,
-                                    description: e.target.value,
-                                })
-                            }
-                            className="textarea textarea-bordered w-full"
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="btn btn-primary">
+
+            <div>
+                <Link href={"/projekte/erstellen"}>
+                    <button className="bg-primary hover:bg-hoverPrimary text-white font-bold py-2 px-4 rounded-xl">
                         Projekt erstellen
                     </button>
-                </form>
+                </Link>
             </div>
 
             {/* Projektliste */}
             <div>
                 <h2 className="text-xl font-semibold mb-4">Projektliste</h2>
                 {projects.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-2 flex flex-col">
                         {projects.map((project) => (
-                            <Link href={`/projekte/${project.id}`} key={project.id}>
-                                <li
+                            <Link
+                                href={`/projekte/${project.id}`}
+                                key={project.id}
+                            >
+                                <div
                                     key={project.id}
-                                    className="bg-gray-100 p-4 rounded-lg shadow"
+                                    className="bg-white flex flex-row justify-between items-center hover:border-primary border-2 transform-all duration-200 p-4 rounded-xl"
                                 >
-                                    <h3 className="text-lg font-semibold">
-                                        {project.title}
-                                    </h3>
-                                    <p>{project.description}</p>
-                                </li>
+                                    <div>
+                                        <div className="flex space-x-4 items-center">
+                                            <h3 className="text-lg font-semibold">
+                                                {project.title}
+                                            </h3>
+                                            <div className="dropdown dropdown-end">
+                                                <div
+                                                    tabIndex={0}
+                                                    role="button"
+                                                    onClick={(e) => e.preventDefault()}
+                                                    className="text-yellow-700 z-50 bg-yellow-200 rounded-full px-2 py-1"
+                                                >
+                                                    In Ausführung
+                                                </div>
+                                                <ul
+                                                    tabIndex={0}
+                                                    className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+                                                >
+                                                    <li>
+                                                        <a>Item 1</a>
+                                                    </li>
+                                                    <li>
+                                                        <a>Item 2</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <p>{project.description}</p>
+                                    </div>
+                                    <div className="hover:bg-gray-200 rounded-full p-2 transition-all duration-200">
+                                        <EllipsisVerticalIcon onClick={(e) => e.preventDefault()} className="h-8 w-8" />
+                                    </div>
+                                </div>
                             </Link>
                         ))}
                     </ul>

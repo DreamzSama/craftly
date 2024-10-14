@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import SessionWrapper from "@/components/SessionWrapper";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 const inter = Poppins({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -16,19 +18,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={inter.className}>
-                {/* Container, der die volle Breite des Bildschirms einnimmt, aber nicht darüber hinausgeht */}
-                <div className="flex h-screen max-w-screen overflow-hidden">
-                    {/* Sidebar bleibt links fixiert */}
-                    <Sidebar />
-
-                    {/* Der children-Bereich passt sich an und ist scrollbar, wenn der Inhalt größer ist */}
-                    <div className="flex-1 overflow-y-auto w-full max-w-full">
-                        {children}
-                    </div>
-                </div>
-            </body>
-        </html>
+        <SessionWrapper>
+            <html lang="en">
+                <body className={inter.className}>
+                    <LayoutWrapper children={children} />
+                </body>
+            </html>
+        </SessionWrapper>
     );
 }

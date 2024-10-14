@@ -43,9 +43,9 @@ export default function Page() {
     }) => {
         const init = {
             projectId: documentData.projectId,
-            invoiceNumber: "0101243001",
+            invoiceNumber: Math.random().toString(36).slice(2),
             description: "Test Rechnung",
-            ownerId: 2,
+            ownerId: "cm29892rz0000o1i74n9sgwpz",
             issueDate: new Date(),
             totalAmount: 0,
             createdAt: new Date(),
@@ -66,6 +66,8 @@ export default function Page() {
 
             const data = await response.json();
             console.log("Document created:", data);
+
+            fetchInvoices();
         } catch (error) {
             console.error("Error creating document:", error);
         }
